@@ -10,7 +10,7 @@ from friendisqt.sprites import load_sprites
 
 class Friend(QWidget):
     def __init__(self, who='baba', where=None):
-        super().__init__(None, Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowStaysOnTopHint)
+        super().__init__(None, Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowStaysOnTopHint | Qt.Tool )
         self.sprites = load_sprites(who)
 
         refresh_rate = math.floor(self.screen().refreshRate())
@@ -47,14 +47,14 @@ class Friend(QWidget):
         self.thinktimer.timeout.connect(self.think)
         self.thinktimer.start(random.randint(1000, 5000))
 
-        self.speed = 120 // refresh_rate
+        self.speed = 240 // refresh_rate
         # falling is not implemented yet
         # so allow vertical walking instead
         self.vspeed = 0
 
         self.movetimer = QTimer(self)
         self.movetimer.timeout.connect(self.movement)
-        self.movetimer.start(1000//refresh_rate)
+        self.movetimer.start(2000//refresh_rate)
 
     @property
     def activity(self):

@@ -9,8 +9,9 @@ from friendisqt.sprites import load_sprites
 
 
 class Friend(QWidget):
-    def __init__(self, who='baba', where=None):
+    def __init__(self, world, who='baba', where=None):
         super().__init__(None, Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowStaysOnTopHint | Qt.Tool )
+        self.world = world
         self.sprites = load_sprites(who)
 
         refresh_rate = math.floor(self.screen().refreshRate())
@@ -24,6 +25,8 @@ class Friend(QWidget):
 
         quit_action = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=QApplication.instance().quit)
         self.addAction(quit_action)
+        debug_action = QAction("&Debug", self, shortcut="Ctrl+D", triggered=self.world.debug)
+        self.addAction(debug_action)
 
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
         self.setToolTip(f"Drag {who.title()} with the left mouse button.\n"

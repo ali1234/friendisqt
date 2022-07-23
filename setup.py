@@ -18,6 +18,6 @@ setup(
         ],
     },
     install_requires=[
-        'PyQt5', 'click'
+        'PyQt5', 'click', 'mss'
     ],
 )

@@ -1,18 +1,18 @@
 import math
 import random
 
-from PyQt5.QtCore import QPoint, Qt, QTimer
+from PyQt5.QtCore import QPoint, Qt, QTimer, QSignalMapper
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QAction, QApplication, QWidget
 
-from friendisqt.sprites import load_sprites
+from friendisqt.sprites import Sprites
 
 
 class Friend(QWidget):
     def __init__(self, world, who='baba', where=None):
         super().__init__(world, Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowStaysOnTopHint | Qt.Tool )
         self.world = world
-        self.sprites = load_sprites(who)
+        self.sprites = Sprites.load(who)
 
         refresh_rate = math.floor(self.screen().refreshRate())
 
@@ -23,10 +23,20 @@ class Friend(QWidget):
             y = random.randint(100, rec.height() - 100)
             self.move(x, y)
 
-        quit_action = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=QApplication.instance().quit)
-        self.addAction(quit_action)
+        self.add_mapper = QSignalMapper(self)
+        self.add_mapper.mapped[str].connect(self.world.add_friend)
+
+        for friend in sorted(self.sprites.available):
+            action = QAction(f"{friend.title()}", self, triggered=self.add_mapper.map)
+            self.add_mapper.setMapping(action, friend)
+            self.addAction(action)
+
         debug_action = QAction("&Debug", self, shortcut="Ctrl+D", triggered=self.world.debug)
         self.addAction(debug_action)
+
+        quit_action = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=QApplication.instance().quit)
+        self.addAction(quit_action)
+
 
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
         self.setToolTip(f"Drag {who.title()} with the left mouse button.\n"

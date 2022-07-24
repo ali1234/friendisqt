@@ -6,6 +6,14 @@ from PyQt5.QtGui import QImage, QRegion, QBitmap
 
 
 class Sprites:
+
+    cache = {}
+    available = {}
+    sprite_paths = [
+        pathlib.Path(__file__).parent / 'sprites',
+        pathlib.Path('.'),
+    ]
+
     def __init__(self, sprite_path):
         self._sprites = {}
         self._masks = {}
@@ -49,22 +57,21 @@ class Sprites:
         """Gets the image and mask for an activity/direction/frame."""
         return self._activities[item[0]][item[1]][item[2]]
 
+    @classmethod
+    def scan_sprite_paths(cls):
+        for p in cls.sprite_paths:
+            for d in pathlib.Path(p).iterdir():
+                if d.is_dir():
+                    for f in d.iterdir():
+                        if f.match('*_?_*.png'):
+                            cls.available[d.name] = d
+                            break
 
-sprites = {}
-
-search_paths = [
-    pathlib.Path(__file__).parent / 'sprites',
-    pathlib.Path('.'),
-]
-
-def load_sprites(who):
-    if who not in sprites:
-        for p in reversed(search_paths):
-            p = pathlib.Path(p)
-            if (p / who).exists():
-                sprites[who] = Sprites(p / who)
-                print(f'Loaded sprites for {who.title()} from "{p / who}".')
-                break
-        else:
-            raise FileNotFoundError(f"Can't find sprites for {who.title()}.")
-    return sprites[who]
+    @classmethod
+    def load(cls, who):
+        if who not in cls.cache:
+            if who not in cls.available:
+                raise FileNotFoundError(f"Can't find sprites for {who.title()}.")
+            cls.cache[who] = Sprites(cls.available[who])
+            print(f'Loaded sprites for {who.title()} from "{cls.available[who]}".')
+        return cls.cache[who]

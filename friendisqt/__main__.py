@@ -5,7 +5,7 @@ import click
 
 from PyQt5.QtWidgets import QApplication
 
-from friendisqt import sprites
+from friendisqt.sprites import Sprites
 from friendisqt.world import World
 
 
@@ -15,7 +15,8 @@ from friendisqt.world import World
 @click.option('-d', '--debug', is_flag=True, help='Start with the debug window open.')
 def main(path, who, debug):
     app = QApplication(sys.argv)
-    sprites.search_paths.extend(reversed(path))
+    Sprites.sprite_paths.extend(reversed(path))
+    Sprites.scan_sprite_paths()
     world = World()
     if debug:
         world.debug()

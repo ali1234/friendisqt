@@ -117,13 +117,14 @@ class Friend(QWidget):
 
     def refresh(self):
         """Updates pet factor, updates the window shape and triggers a paint event."""
+        self._frame = self._frame % self.sprites.activity_frames(self.activity, self.direction)
         self._image, mask = self.sprites[self.activity, self.direction, self._frame]
         self.setMask(mask)
         self.update()
 
     def animate(self):
         """Updates the current animation frame."""
-        self._frame = (self._frame + 1) % 4
+        self._frame += 1
         self.refresh()
 
     def think(self):

@@ -16,11 +16,12 @@ Clone this repository and run `pip install .` in the top level (preferably with 
 
 ## Options:
 
-`friendisqt -w <character> -p <path>`
-
 - `-w <character>` to create an instance of that character. For example `-w baba`. 
   May be specified multiple times to get multiple instances. By default, one `baba`
   is created.
+- `--all` to add exactly one of every available friend.
+- `--party <int>` to add many friends at once. They will be chosen at random from
+  this list of scanned sprites.
 - `-p <path>` adds a directory to the sprite search path. For example
   `-p /path/to/BabaFriend/sprites`. May be specified multiple times. 
   Directories will be searched for a sprite directory with the character's

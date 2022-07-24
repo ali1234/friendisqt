@@ -10,22 +10,47 @@ from friendisqt.world import World
 
 
 @click.command()
+@click.option('-w', '--who', metavar='NAME', type=str, multiple=True, help='Name of character to add.')
+@click.option('--all', '_all', is_flag=True, default=0, help='Add one of each friend.')
+@click.option('--party', metavar='N', type=int, default=0, help='Add N random friends.')
 @click.option('-p', '--path', type=click.Path(exists=True), multiple=True, help='Add a path to search for sprites.')
-@click.option('-w', '--who', type=str, multiple=True, default=['baba'], help='Name of character to add.')
-@click.option('-d', '--debug', is_flag=True, help='Start with the debug window open.')
-def main(path, who, debug):
+@click.option('--debug', is_flag=True, help='Start with the debug window open.')
+def main(path, who, debug, _all, party):
     app = QApplication(sys.argv)
     Sprites.sprite_paths.extend(reversed(path))
     Sprites.scan_sprite_paths()
+    avail = list(Sprites.available.keys())
+
+    if len(avail) == 0:
+        raise FileNotFoundError("No sprite sheets were found.")
+
     world = World()
     if debug:
         world.debug()
+
+    if _all:
+        print(avail)
+        for w in avail:
+            print(w)
+            world.add_friend(w)
+
+    if party:
+        for n in range(party):
+            world.add_friend(random.choice(avail))
+
     for w in who:
         try:
             world.add_friend(w)
         except FileNotFoundError as e:
             print(e)
             sys.exit(-1)
+
+    if not any((_all, party, who)):
+        if 'baba' in avail:
+            world.add_friend('baba')
+        else:
+            world.add_friend(avail[0])
+
     sys.exit(app.exec_())
 
 

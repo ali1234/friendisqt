@@ -9,7 +9,13 @@ from friendisqt.sprites import Sprites
 
 class Friend(QWidget):
     def __init__(self, world, who='baba', where=None):
-        super().__init__(world, Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowStaysOnTopHint | Qt.Tool )
+        super().__init__(world,
+                         Qt.FramelessWindowHint |
+                         Qt.WindowSystemMenuHint |
+                         Qt.WindowStaysOnTopHint |
+                         Qt.NoDropShadowWindowHint |
+                         Qt.BypassWindowManagerHint |
+                         Qt.Tool )
         self.world = world
         self.sprites = Sprites.load(who)
 

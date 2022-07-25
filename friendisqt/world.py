@@ -1,3 +1,5 @@
+import math
+
 import mss
 from PyQt5 import Qt
 
@@ -12,11 +14,21 @@ class World(QWidget):
         super().__init__()
         self._friends = []
 
+        self.refresh_rate = math.floor(self.screen().refreshRate())
+
         self._mss = mss.mss()
         self.screengrab()
         self.setFixedSize(self.img.width // 4, self.img.height // 4)
         self.setWindowTitle("Friend World Debug")
         self.setWindowFlag(Qt.WindowMinMaxButtonsHint, False)
+
+        self.animtimer = QTimer(self)
+        self.animtimer.timeout.connect(self.animate)
+        self.animtimer.start(150)
+
+        self.movetimer = QTimer(self)
+        self.movetimer.timeout.connect(self.movement)
+        self.movetimer.start(2000 // self.refresh_rate)
 
         self.screengrabtimer = QTimer(self)
         self.screengrabtimer.timeout.connect(self.screengrab)
@@ -33,6 +45,14 @@ class World(QWidget):
         f = Friend(self, who)
         f.show()
         self._friends.append(f)
+
+    def animate(self):
+        for friend in self._friends:
+            friend.animate()
+
+    def movement(self):
+        for friend in self._friends:
+            friend.movement()
 
     def screengrab(self):
         self.img = self._mss.grab(self._mss.monitors[0])

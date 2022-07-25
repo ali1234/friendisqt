@@ -1,4 +1,3 @@
-import math
 import random
 
 from PyQt5.QtCore import QPoint, Qt, QTimer, QSignalMapper
@@ -13,8 +12,6 @@ class Friend(QWidget):
         super().__init__(world, Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowStaysOnTopHint | Qt.Tool )
         self.world = world
         self.sprites = Sprites.load(who)
-
-        refresh_rate = math.floor(self.screen().refreshRate())
 
         self.resize(self.sprites.size)
         if where is None:
@@ -37,7 +34,6 @@ class Friend(QWidget):
         quit_action = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=QApplication.instance().quit)
         self.addAction(quit_action)
 
-
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
         self.setToolTip(f"Drag {who.title()} with the left mouse button.\n"
                 "Use the right mouse button to open a context menu.")
@@ -52,22 +48,14 @@ class Friend(QWidget):
         self._last_pet = None
         self.animate()
 
-        self.animtimer = QTimer(self)
-        self.animtimer.timeout.connect(self.animate)
-        self.animtimer.start(150)
-
         self.thinktimer = QTimer(self)
         self.thinktimer.timeout.connect(self.think)
         self.thinktimer.start(random.randint(1000, 5000))
 
-        self.speed = 240 // refresh_rate
+        self.speed = 240 // world.refresh_rate
         # falling is not implemented yet
         # so allow vertical walking instead
         self.vspeed = 0
-
-        self.movetimer = QTimer(self)
-        self.movetimer.timeout.connect(self.movement)
-        self.movetimer.start(2000//refresh_rate)
 
     @property
     def activity(self):

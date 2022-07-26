@@ -29,9 +29,7 @@ def main(path, who, debug, _all, party):
         world.debug()
 
     if _all:
-        print(avail)
         for w in avail:
-            print(w)
             world.add_friend(w)
 
     if party:

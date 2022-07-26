@@ -22,6 +22,9 @@ Clone this repository and run `pip install .` in the top level (preferably with 
 - `--all` to add exactly one of every available friend.
 - `--party <int>` to add many friends at once. They will be chosen at random from
   this list of scanned sprites.
+- `-s` to make friends stay on their current monitor. You can still drag them to
+  another monitor. Also you can change this setting on a per-friend basis in the
+  context menu.
 - `-p <path>` adds a directory to the sprite search path. For example
   `-p /path/to/BabaFriend/sprites`. May be specified multiple times. 
   Directories will be searched for a sprite directory with the character's

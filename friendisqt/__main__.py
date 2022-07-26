@@ -13,9 +13,10 @@ from friendisqt.world import World
 @click.option('-w', '--who', metavar='NAME', type=str, multiple=True, help='Name of character to add.')
 @click.option('--all', '_all', is_flag=True, default=0, help='Add one of each friend.')
 @click.option('--party', metavar='N', type=int, default=0, help='Add N random friends.')
+@click.option('-s', '--stay', is_flag=True, help='Friends stay within the monitor they are placed on.')
 @click.option('-p', '--path', type=click.Path(exists=True), multiple=True, help='Add a path to search for sprites.')
 @click.option('--debug', is_flag=True, help='Start with the debug window open.')
-def main(path, who, debug, _all, party):
+def main(path, who, debug, _all, party, stay):
     app = QApplication(sys.argv)
     Sprites.sprite_paths.extend(reversed(path))
     Sprites.scan_sprite_paths()
@@ -24,7 +25,7 @@ def main(path, who, debug, _all, party):
     if len(avail) == 0:
         raise FileNotFoundError("No sprite sheets were found.")
 
-    world = World(app)
+    world = World(app, stay)
     if debug:
         world.debug()
 

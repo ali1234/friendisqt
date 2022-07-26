@@ -10,11 +10,12 @@ from PyQt5.QtWidgets import QWidget
 from friendisqt.friend import Friend
 
 class World(QWidget):
-    def __init__(self, app):
+    def __init__(self, app, stay):
         super().__init__()
         self._friends = []
 
         self.app = app
+        self.stay_default = stay
         self.build_bounds()
 
         self.refresh_rate = math.floor(self.screen().refreshRate())
@@ -78,7 +79,7 @@ class World(QWidget):
         self.hide()
 
     def add_friend(self, who):
-        f = Friend(self, who)
+        f = Friend(self, who, stay_on_monitor=self.stay_default)
         f.show()
         self._friends.append(f)
 

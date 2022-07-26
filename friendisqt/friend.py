@@ -8,7 +8,7 @@ from friendisqt.sprites import Sprites
 
 
 class Friend(QWidget):
-    def __init__(self, world, who='baba', where=None):
+    def __init__(self, world, who='baba', where=None, stay_on_monitor=False):
         super().__init__(world,
                          Qt.FramelessWindowHint |
                          Qt.WindowSystemMenuHint |
@@ -22,9 +22,13 @@ class Friend(QWidget):
         self.resize(self.sprites.size)
         if where is None:
             rec = QApplication.desktop().rect()
-            x = random.randint(100, rec.width() - 100)
-            y = random.randint(100, rec.height() - 100)
-            self.move(self.clamp_to_screen(QPoint(x, y)))
+            pos = QPoint(random.randint(100, rec.width() - 100),
+                         random.randint(100, rec.height() - 100))
+
+            if stay_on_monitor:
+                self.move(self.clamp_to_screen(pos, self.world.screen_near_point(pos)))
+            else:
+                self.move(self.clamp_to_desktop(pos))
 
         self.add_mapper = QSignalMapper(self)
         self.add_mapper.mapped[str].connect(self.world.add_friend)
@@ -33,6 +37,9 @@ class Friend(QWidget):
             action = QAction(f"{friend.title()}", self, triggered=self.add_mapper.map)
             self.add_mapper.setMapping(action, friend)
             self.addAction(action)
+
+        self.stay_action = QAction("&Stay on Monitor", self, shortcut="Ctrl+S", checkable=True, checked=stay_on_monitor)
+        self.addAction(self.stay_action)
 
         debug_action = QAction("&Debug", self, shortcut="Ctrl+D", triggered=self.world.debug)
         self.addAction(debug_action)
@@ -110,19 +117,24 @@ class Friend(QWidget):
             self.activity = 'idle'
             event.accept()
 
-    def clamp_to_screen(self, pos, screen_pos=None):
-        """Returns an adjusted pos, keeping the sprite entirely on the screen nearest screen_pos."""
+    def clamp_to_screen(self, pos, screen):
+        """Returns an adjusted pos, keeping self.rect() entirely on the specified screen."""
+        sx1, sy1, sx2, sy2 = screen.geometry().getCoords()
+        return QPoint(max(sx1, min(pos.x(), sx2 - self.rect().width())),
+                      max(sy1, min(pos.y(), sy2 - self.rect().height())))
+
+    def clamp_to_desktop(self, pos, screen_pos=None):
+        """Returns an adjusted pos, keeping self.rect() entirely on the screen nearest screen_pos."""
         if self.world.oob(self.rect().translated(pos)):
             if screen_pos is None:
                 screen_pos = pos
-            sx1, sy1, sx2, sy2 = self.world.screen_near_point(screen_pos).geometry().getCoords()
-            return QPoint(max(sx1, min(pos.x(), sx2 - self.rect().width())), max(sy1, min(pos.y(), sy2 - self.rect().height())))
+            return self.clamp_to_screen(pos, self.world.screen_near_point(screen_pos))
         return pos
 
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.LeftButton:
             mouse_pos = event.globalPos()
-            self.move(self.clamp_to_screen(mouse_pos - self.drag_start, mouse_pos))
+            self.move(self.clamp_to_desktop(mouse_pos - self.drag_start, mouse_pos))
             event.accept()
         elif event.buttons() == Qt.NoButton:
             self.pet(event.pos().x())
@@ -171,7 +183,7 @@ class Friend(QWidget):
             pos = self.pos()
             pos.setX(pos.x() + (self.speed if self._direction == 'r' else -self.speed))
             pos.setY(pos.y() + self.vspeed)
-            if self.world.oob(self.rect().translated(pos)):
-                self.activity = 'idle'
+            if self.stay_action.isChecked():
+                self.move(self.clamp_to_screen(pos, self.screen()))
             else:
-                self.move(pos)
+                self.move(self.clamp_to_desktop(pos))

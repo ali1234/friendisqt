@@ -107,17 +107,19 @@ class Friend(QWidget):
             self.activity = 'idle'
             event.accept()
 
-    def clamp_to_screen(self, pos):
-        newrect = self.rect().translated(pos)
-        if self.world.oob(newrect):
-            sx1, sy1, sx2, sy2 = self.world.screen_near_point(pos).geometry().getCoords()
+    def clamp_to_screen(self, pos, screen_pos=None):
+        """Returns an adjusted pos, keeping the sprite entirely on the screen nearest screen_pos."""
+        if self.world.oob(self.rect().translated(pos)):
+            if screen_pos is None:
+                screen_pos = pos
+            sx1, sy1, sx2, sy2 = self.world.screen_near_point(screen_pos).geometry().getCoords()
             return QPoint(max(sx1, min(pos.x(), sx2 - self.rect().width())), max(sy1, min(pos.y(), sy2 - self.rect().height())))
         return pos
 
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.LeftButton:
-            newpos = self.clamp_to_screen(event.globalPos() - self.drag_start)
-            self.move(newpos)
+            mouse_pos = event.globalPos()
+            self.move(self.clamp_to_screen(mouse_pos - self.drag_start, mouse_pos))
             event.accept()
         elif event.buttons() == Qt.NoButton:
             self.pet(event.pos().x())

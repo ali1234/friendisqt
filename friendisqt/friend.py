@@ -85,6 +85,9 @@ class Friend(QWidget):
         self._direction = d
         self.refresh()
 
+    def pos(self):
+        return self.geometry().topLeft()
+
     def pet(self, x):
         if self._last_pet is not None:
             self._pet_factor += abs(self._last_pet - x)
@@ -98,7 +101,7 @@ class Friend(QWidget):
         if event.button() == Qt.LeftButton:
             self.activity = 'drag'
             self.setCursor(Qt.ClosedHandCursor)
-            self.drag_start = event.globalPos() - self.frameGeometry().topLeft()
+            self.drag_start = event.globalPos() - self.pos()
             event.accept()
 
     def mouseReleaseEvent(self, event):
@@ -165,7 +168,7 @@ class Friend(QWidget):
     def movement(self):
         """Moves the window according to the current action."""
         if self.activity == 'walk':
-            pos = self.mapToGlobal(QPoint(0, 0))
+            pos = self.pos()
             pos.setX(pos.x() + (self.speed if self._direction == 'r' else -self.speed))
             pos.setY(pos.y() + self.vspeed)
             if self.world.oob(self.rect().translated(pos)):

@@ -3,16 +3,19 @@ import math
 import mss
 from PyQt5 import Qt
 
-from PyQt5.QtCore import Qt, QTimer, QPoint
-from PyQt5.QtGui import QPainter, QImage, QColor
+from PyQt5.QtCore import Qt, QTimer, QPoint, QSignalMapper, QRect
+from PyQt5.QtGui import QPainter, QImage, QColor, QRegion, QScreen
 from PyQt5.QtWidgets import QWidget
 
 from friendisqt.friend import Friend
 
 class World(QWidget):
-    def __init__(self):
+    def __init__(self, app):
         super().__init__()
         self._friends = []
+
+        self.app = app
+        self.build_bounds()
 
         self.refresh_rate = math.floor(self.screen().refreshRate())
 
@@ -33,6 +36,39 @@ class World(QWidget):
         self.screengrabtimer = QTimer(self)
         self.screengrabtimer.timeout.connect(self.screengrab)
         self.screengrabtimer.start(500)
+
+    def build_bounds(self):
+        bounds = QRegion()
+        for screen in self.app.screens():
+            bounds += screen.geometry()
+
+        self.bb = bounds.boundingRect()
+        x, y, w, h = self.bb.getRect()
+        self.edge = QRegion(QRect(x-1, y-1, w+2, h+2))
+        self.edge -= bounds
+
+    def oob(self, rect):
+        if self.bb.intersects(rect):
+            return self.edge.intersects(rect)
+        return True
+
+    def screen_near_point(self, pos):
+        screen = self.app.screenAt(pos)
+        if screen:
+            return screen
+        dist = None
+        best = None
+        for screen in self.app.screens():
+            x1, y1, x2, y2 = screen.geometry().getCoords()
+            px = pos.x()
+            py = pos.y()
+            dx = max(x1 - px, 0, px - x2)
+            dy = max(y1 - py, 0, py - y2)
+            d = math.hypot(dx, dy)
+            if dist is None or d < dist:
+                dist = d
+                best = screen
+        return best
 
     def debug(self):
         self.show()

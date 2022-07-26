@@ -24,7 +24,7 @@ class Friend(QWidget):
             rec = QApplication.desktop().rect()
             x = random.randint(100, rec.width() - 100)
             y = random.randint(100, rec.height() - 100)
-            self.move(x, y)
+            self.move(self.clamp_to_screen(QPoint(x, y)))
 
         self.add_mapper = QSignalMapper(self)
         self.add_mapper.mapped[str].connect(self.world.add_friend)
@@ -107,9 +107,17 @@ class Friend(QWidget):
             self.activity = 'idle'
             event.accept()
 
+    def clamp_to_screen(self, pos):
+        newrect = self.rect().translated(pos)
+        if self.world.oob(newrect):
+            sx1, sy1, sx2, sy2 = self.world.screen_near_point(pos).geometry().getCoords()
+            return QPoint(max(sx1, min(pos.x(), sx2 - self.rect().width())), max(sy1, min(pos.y(), sy2 - self.rect().height())))
+        return pos
+
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.LeftButton:
-            self.move(event.globalPos() - self.drag_start)
+            newpos = self.clamp_to_screen(event.globalPos() - self.drag_start)
+            self.move(newpos)
             event.accept()
         elif event.buttons() == Qt.NoButton:
             self.pet(event.pos().x())
@@ -158,4 +166,7 @@ class Friend(QWidget):
             pos = self.mapToGlobal(QPoint(0, 0))
             pos.setX(pos.x() + (self.speed if self._direction == 'r' else -self.speed))
             pos.setY(pos.y() + self.vspeed)
-            self.move(pos)
+            if self.world.oob(self.rect().translated(pos)):
+                self.activity = 'idle'
+            else:
+                self.move(pos)

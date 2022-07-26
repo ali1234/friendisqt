@@ -24,7 +24,7 @@ def main(path, who, debug, _all, party):
     if len(avail) == 0:
         raise FileNotFoundError("No sprite sheets were found.")
 
-    world = World()
+    world = World(app)
     if debug:
         world.debug()
 

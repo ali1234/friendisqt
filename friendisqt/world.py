@@ -83,6 +83,11 @@ class World(QWidget):
         f.show()
         self._friends.append(f)
 
+    def remove_friend(self, friend):
+        self._friends.remove(friend)
+        friend.close()
+        del friend
+
     def animate(self):
         for friend in self._friends:
             friend.animate()

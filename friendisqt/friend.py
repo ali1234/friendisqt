@@ -38,6 +38,9 @@ class Friend(QWidget):
             self.add_mapper.setMapping(action, friend)
             self.addAction(action)
 
+        remove_action = QAction("&Remove", self, shortcut="Ctrl+X", triggered=lambda: self.world.remove_friend(self))
+        self.addAction(remove_action)
+
         self.stay_action = QAction("&Stay on Monitor", self, shortcut="Ctrl+S", checkable=True, checked=stay_on_monitor)
         self.addAction(self.stay_action)
 

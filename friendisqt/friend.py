@@ -2,7 +2,7 @@ import random
 
 from PyQt5.QtCore import QPoint, Qt, QTimer, QSignalMapper
 from PyQt5.QtGui import QPainter
-from PyQt5.QtWidgets import QAction, QApplication, QWidget
+from PyQt5.QtWidgets import QAction, QApplication, QWidget, QMenu
 
 from friendisqt.sprites import Sprites
 
@@ -30,13 +30,16 @@ class Friend(QWidget):
             else:
                 self.move(self.clamp_to_desktop(pos))
 
-        self.add_mapper = QSignalMapper(self)
-        self.add_mapper.mapped[str].connect(self.world.add_friend)
-
+        add_mapper = QSignalMapper(self)
+        add_mapper.mapped[str].connect(self.world.add_friend)
+        add_menu = QMenu()
+        add_action = QAction('Add...', self)
+        add_action.setMenu(add_menu)
         for friend in sorted(self.sprites.available):
-            action = QAction(f"{friend.title()}", self, triggered=self.add_mapper.map)
-            self.add_mapper.setMapping(action, friend)
-            self.addAction(action)
+            action = QAction(f"{friend.title()}", self, triggered=add_mapper.map)
+            add_mapper.setMapping(action, friend)
+            add_menu.addAction(action)
+        self.addAction(add_action)
 
         remove_action = QAction("&Remove", self, shortcut="Ctrl+X", triggered=lambda: self.world.remove_friend(self))
         self.addAction(remove_action)
